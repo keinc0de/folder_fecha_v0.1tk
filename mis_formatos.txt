@@ -1,0 +1,2 @@
+imags %d%B seg%S
+test %d%b
