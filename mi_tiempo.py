@@ -12,6 +12,7 @@ class MiTiempo:
         return self.TM
     
     def obten_texto(self, codigo):
+        self.TM = datetime.datetime.now()
         return self._limpiar_chars(self.TM.strftime(codigo))
     
     def _limpiar_chars(self, texto):

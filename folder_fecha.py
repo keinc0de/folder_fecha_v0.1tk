@@ -211,7 +211,7 @@ class FolderFecha(tk.Tk):
 
                     self.escribe('FOLDER CREADO\n', 'ver2')
                     self.escribe(f"{folder}/", 'def')
-                    self.escribe(f"{nom}\n", 'nar1')
+                    self.escribe(f"{nom}\n", 'az1')
             except OSError as e:
                 self.escribe(f'ERROR: {e}\n', 'err')
 
