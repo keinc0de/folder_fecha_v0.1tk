@@ -17,11 +17,12 @@ class FolderFecha(tk.Tk):
         }
         self.cf = {
             'bg':'#fff',
-            'wv':450,
+            'wv':520,
             'hv':250, 
             'archivo rutas':'rutas.txt',
             'mis formatos':'mis_formatos.txt',
             'fo1':('consolas', 8),
+            'fo2':('Segoe UI', 10),
             'err':'#E12A62',
             'ver1':'#20AC82',
             'ver2':'#004242',
@@ -32,7 +33,8 @@ class FolderFecha(tk.Tk):
             'am1':'#E7BD50',
             'am2':'#E7A632',
             'ng1':'#1F2C32',
-            'ver0':'#8BC76B'
+            'ver0':'#8BC76B',
+            'bgt1':'#F0EAD6'
         }
 
         self.geometry(f"{self.cf.get('wv')}x{self.cf.get('hv')}")
@@ -41,7 +43,7 @@ class FolderFecha(tk.Tk):
         self.config(bg=bg)
         
         # FRAMES
-        fr_top = tk.Frame(self, bg='green')
+        fr_top = tk.Frame(self, bg=bg)
         fr_top.pack(side='top', expand=1, fill='x')
         fr_d = tk.Frame(fr_top, bg='blue')
         fr_d.pack(side='right', expand=1, fill='x')
@@ -76,8 +78,11 @@ class FolderFecha(tk.Tk):
         )
         self.bt_info.pack(side='left')
         self.cmb_formato = ttk.Combobox(
-            frb, font=cf.get('fo1')
+            frb, font=cf.get('fo2')
         )
+        _cf_bts = {'relief':'groove', 'pady':0, 'font':cf['fo1']}
+        self.bt_mas = tk.Button(frb, text='+', width=2, **_cf_bts)
+        self.bt_mas.pack(side='left')
         self.cmb_formato.pack(side='left', expand=1, fill='x')
         # self.cmb_formato.bind('<Return>', self.revisa_formato)
         self.tex = tk.Text(fr_bot, bg='#EAEAE4', font=('consolas', 10))
@@ -86,8 +91,13 @@ class FolderFecha(tk.Tk):
         self.tex.config(yscrollcommand=self.scroll.set, relief='flat')
         self.tex.grid(column=0, row=0, sticky='wens')
         self.scroll.grid(column=1, row=0, sticky='ns')
-        self.bt_mas = tk.Button(frb, text='+', relief='groove', pady=0)
-        self.bt_mas.pack(side='left')
+
+
+        self.bt_rmas = tk.Button(fra, text='+', width=2, **_cf_bts)
+        self.bt_rmas.pack(side='left')
+
+        self.bt_abrir = tk.Button(fra, text='ABRIR', width=5, command=self.abrir_ruta, **_cf_bts)
+        self.bt_abrir.pack(side='left')
 
 
         self.rowconfigure(0, weight=1, minsize=32)
@@ -124,7 +134,7 @@ class FolderFecha(tk.Tk):
         )
         s.map(
             'TCombobox', foreground=[('readonly',cf['def'])],
-            selectbackground=[('focus', bg), ('!focus', bg), ('readonly', bg)],
+            selectbackground=[('focus', cf['bg']), ('!focus', bg), ('readonly', bg)],
             fieldbackground=[('focus', bg), ('!focus', bg), ('readonly', bg)],
             selectforeground=[('focus', cf['az2']), ('!focus', cf['ng1'])]
         )
@@ -142,14 +152,51 @@ class FolderFecha(tk.Tk):
         self.bt_info.config(command=self.muestra_info)
         bt_folder.config(command=self.crear_carpeta)
         self.bt_mas.config(command=self._misformatos_escribe)
+        self.bt_rmas.config(command=self._misrutas_escribe)
 
         self.img_fam = tk.PhotoImage(data=imgs['folder24_am'])
         self.iconphoto(True, self.img_fam)
         self.title('FOLDER FECHA')
 
+        self.ONTOP = tk.BooleanVar(value=False)
+        # self.chb_top = tk.Checkbutton(
+        #     fra, text='TOP', command=self._sobre, bg=bg, font=cf['fo1'],
+        #     relief='flat', variable=self.ONTOP
+        # )
+        self.chb_top = ttk.Checkbutton(
+            fra, text='TOP', command=self._sobre, variable=self.ONTOP
+        )
+        self.chb_top.pack(side='left')
+        s.configure(
+            'TCheckbutton',
+            indicatorrefief='flat',
+            background='white',
+            # indicatormargin=5
+            # padding=0,
+            # selectbackground=bg
+            # bordercolor='red',
+            # border=0
+        )
+        s.map(
+            'TCheckbutton',
+            # foreground=[('focus', 'green')],
+            # background=[('focus', 'yellow'), ('!focus', 'orange')],
+            indicatorbackground=[('focus', '#C1F1FF'), ('!focus', bg)],
+            indicatorcolor=[('focus', 'red'), ('!focus', 'white')]
+            # selectbackground=[('focus', 'flat'), ('!focus', 'flat')],
+            # lightcolor=[('focus', 'green')],
+            # darkcolor=[('focus', 'orange')]
+        )
+
     def rutas_carga(self):
-        lineas = self.lee_archivo(self.cf.get('archivo rutas'))
+        archivo_rutas = self.cf.get('archivo rutas')
+        if not Path(archivo_rutas).exists():
+            with open(archivo_rutas, 'w') as txt:
+                txt.write('.\n')
+            self.escribe('"rutas.txt" fue creado.\n', self.cf['ver2'])
+        lineas = self.lee_archivo(archivo_rutas)
         self.cmb_rutas.config(values=lineas)
+        self.cmb_rutas.current(0)
     
     def lee_archivo(self, archivo):
         with open(archivo, 'r') as txt:
@@ -216,8 +263,14 @@ class FolderFecha(tk.Tk):
                 self.escribe(f'ERROR: {e}\n', 'err')
 
     def _misformatos_carga(self):
-        lineas = self.lee_archivo(self.cf.get('mis formatos'))
+        archivo_formatos = self.cf.get('mis formatos')
+        if not Path(archivo_formatos).exists():
+            with open(archivo_formatos, 'w') as txt:
+                txt.write('%A %w - %H.%M\n')
+            self.escribe(f'"{archivo_formatos}" fue creado.\n', self.cf['ver2'])
+        lineas = self.lee_archivo(archivo_formatos)
         self.cmb_formato.config(values=lineas)
+        self.cmb_formato.current(0)
 
     def _misformatos_escribe(self):
         archivo = self.cf.get('mis formatos')
@@ -232,6 +285,36 @@ class FolderFecha(tk.Tk):
             self._misformatos_carga()
             self.escribe('se guardo ', 'def')
             self.escribe(f'{new_formato}\n', 'ver2')
+
+    def _misrutas_escribe(self):
+        archivo = self.cf.get('archivo rutas')
+        lineas = self.lee_archivo(archivo)
+        new_ruta = self.cmb_rutas.get()
+        if new_ruta!='' and new_ruta not in lineas:
+            lineas.append(new_ruta)
+
+            texto = '\n'.join(lineas)
+            with open(archivo, 'w') as txt:
+                txt.write(texto)
+            self.rutas_carga()
+            self.escribe('se guardo ', 'def')
+            self.escribe(f'{new_ruta}\n', 'ver2')
+
+    def abrir_ruta(self):
+        # app.attributes('-topmost', True)
+        # app.update()
+        # app.attributes('-topmost', False)
+        try:
+            rt = self.cmb_rutas.get()
+            os.system(f"start {rt}")
+            self.attributes('-topmost', True)
+        except Exception as e:
+            self.escribe(f"{e} ->{rt}", self.cf['err'])
+        # self.attributes('-topmost', False)
+
+    def _sobre(self):
+        self.attributes('-topmost', self.ONTOP.get())
+        self.update()
 
 
 if __name__=="__main__":
