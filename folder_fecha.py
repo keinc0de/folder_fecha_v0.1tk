@@ -1,8 +1,10 @@
+# -*- coding:utf-8 -*-
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
 import os
 from mi_tiempo import MiTiempo
+import webbrowser
 
 
 class FolderFecha(tk.Tk):
@@ -12,7 +14,7 @@ class FolderFecha(tk.Tk):
 
     def _config_ff(self):
         imgs = {
-            "folder24_am": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7DAAAOwwHHb6hkAAADqklEQVRIiaVVTWhcVRT+zv2Zd15mkkybTC0iIlLRQt00tEsFN8Zf0IqLLqRdSEWb4Kpb3bhSEEwq/oC2IoWKilARl4KLkobEulHRpGMiNM3MyyQmk3kz8+67x8VkmmmY2IQcOFy4cM93zne/c45WCgo7NKVAABQA2ekbAoADg/Tgk4/Ti/ffq8JtHguA4LPL6XcLJZlWCsZ7uB0hHD2ihv++Gvwryyy+HHqJQtnqaSn0sh7KtR+CaCBPxwHAWmSMgenmWsPcZuanbzO/S5ml9ifHvsQi5S4esTSKHMsi+6kfM0v7++kYABBtTy8RoBQUxTOcWA0V1xGPfe4+qMWoaQUtG1QpBdRi0Inn1JnjQ+ogBLg27W99c8V/3BNCvN8M6j3AAaiRoP7JpfTrxbLMojHLTZlnKV8Ponwf5TfQqSMTBQD7+ujYxPeZSErsG0WOJeperV9kLxWWv34OVo4eUcOKsBnMGJj22cGnshaZ5VWZHD6ZPDUx4ZcyBWKfdlcSEageoX7osOp/9y3zPjVnObEWJqrI0kOPNQ+trMoKEUjkzgBt5Rws0NCrJ/ULBDTQkRwBlHqkPSF6Rk6b0WyIcHkNHs1ZTv6Poi3ZqY1e6Jo5AOT7KF/6JSjLHEvzBjfNdiroZiLwAJQx0N0AkgRJNgujNYnzQOrgdwXQBnEOfut9u7KMgbM9YkyOoB0yOx4TdzOloK2FLf4jK+c/Tb/8dcqvX/oqvbirP9gNHoBeALRrijqNABJAOACPnDIjvTn0VtdRHb/oxmsx1rSG3lMF1sICwOAADVaKXJE4lEqRK4UBKhBA1sLuqQLnWhPVJXD1SBpQQD2SRpIgEUCcg9s1QCcto6fNKAdgDsC5LOVAQC5LuXOv6XO1GDWtoe/o5MNPNB+JKhJZC7u1kwFAWjeUpkjy/ZS/MZUp7hugvDQhaQ0e0srAZKHbJBt0LJjbJTu4bgDA5v9svL/rZqPqH5yEDFWLu4/rdrAkhRwYIHt12s9dvpJeCBlm9JR5MwgQcAA+21JRbq2K6vgFN9amCLUZnk/nWeozHMt2C6c9ikvs5BbLS0/rMwCgdUtF+T7K35wMFmSO5eZksNCpRvX2e+5suSLVIA8WkIAI27l4CBg48YzKAh3j3cJwgQLcQ+ACBcZujn0CgKFH1cMvP6ueX4/BzkFoSxcQAUkCeeA+ygzux+o7Y+6j67/JulIg71uKev0V80ZvDr1rVax9+IU7X2+gTgSCbi3nvY6Gbe0/mPXxqMI+Zx8AAAAASUVORK5CYII=",
+            "folder24_am": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA7UlEQVRIx2NgoBOQAeJ8IG4ggA3IMdweiD8D8X8i8FsgNiLVgnNEGk62JX9hmrNDhXBiPm6m32iWNOEJynxosIMB3HXXVqngxBt75X6jWUIIf4YGP3EWkGnJOZIsgFmCLyhBGMnMPyRbQAxG88XQtAAWT79pYkFOmBAo7L9DaapZ0ICEkX1DuQXQ/FSPhBloYQFKxFLDgv2wIMFhAVyOXAsc0MofZAuQxcmzAIurcWHaW0BUcQ3DnbniP5GCCDnlIBuKkqJOk1jhwCzBG8nIwAaIv5JhAd5kig7kiaz0Gyx0uSrRci3MB3VImH4AAIz4JcQKp4KFAAAAAElFTkSuQmCC",
             "folder24_ng": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsSAAALEgHS3X78AAAB1UlEQVRIiaXVvWpUQRQH8N+9m93NKqghiGBnJfgCQoqUaQTBF7AVRLTxBXwFCysrBWt9DQshpZVahIAkoKJxieZeiznjjst+XffAYebOzPn4/+fMuVDrJp3OVzFex22M5pxrY+813qKHs1WD7OEwnDQxTmteP8Ru2A3QX6B/ke6H8ekc51nHMR5hJ2yX0VVXAbXGTzzFj6CglShsYv8uroXhB7wo9trCaYUTvMF7BfzPGM7KIsadyL5Es4zOvTLAEa6Ew2l+BxFk1/L7avErxv1MQYVjqZqO47uEzaRybuJO0FAV+5nu83goVV0zjWC7ODxL5q2XMpTobnG2sYJBKa2EZFb1VPiNrSKRpmsAEg2zHlmmdVwE6HVtE4tkQyqGb3iO71LZd7qDVaWHC+j9D0WlZFpGeICL+IpnEpKa9RAM4uxVk8c3ju8ag3XvIPev41DFvMHpOhSNpAe1GboV65fwxKSnrdQqphUuh5NFHbgtETT4kqEtyLxThS1r16W0gewjXobtI6k1bMb8nNSjSj/eWe2H00QyLe5F0MzAEAexd6Bo+zUeS82pPyPrZTIMH9smJZ7nNQaZzxu4Zf5PXwTv4xNeSZSWD+2+fx9a3ldZvzXMlT82LKwSKbqzUwAAAABJRU5ErkJggg=="
         }
         self.cf = {
@@ -23,6 +25,7 @@ class FolderFecha(tk.Tk):
             'mis formatos':'mis_formatos.txt',
             'fo1':('consolas', 8),
             'fo2':('Segoe UI', 10),
+            'fo3':('Times new roman', 10),
             'err':'#E12A62',
             'ver1':'#20AC82',
             'ver2':'#004242',
@@ -34,7 +37,9 @@ class FolderFecha(tk.Tk):
             'am2':'#E7A632',
             'ng1':'#1F2C32',
             'ver0':'#8BC76B',
-            'bgt1':'#F0EAD6'
+            'bgt1':'#F0EAD6',
+            'ver3':'#042A3B',
+            'mor1':'#470962'
         }
 
         self.geometry(f"{self.cf.get('wv')}x{self.cf.get('hv')}")
@@ -69,7 +74,7 @@ class FolderFecha(tk.Tk):
         self.cmb_rutas.pack(side='left', expand=1, fill='x')
         self.NUEVO_FOLDER = tk.StringVar()
         self.en_new_folder = ttk.Entry(
-            frb, textvariable=self.NUEVO_FOLDER, font=cf.get('fo1')
+            frb, textvariable=self.NUEVO_FOLDER, font=cf.get('fo2')
         )
         self.en_new_folder.pack(side='left', fill='x', expand=1)
         self.bt_info = tk.Button(
@@ -84,26 +89,20 @@ class FolderFecha(tk.Tk):
         self.bt_mas = tk.Button(frb, text='+', width=2, **_cf_bts)
         self.bt_mas.pack(side='left')
         self.cmb_formato.pack(side='left', expand=1, fill='x')
-        # self.cmb_formato.bind('<Return>', self.revisa_formato)
         self.tex = tk.Text(fr_bot, bg='#EAEAE4', font=('consolas', 10))
         self.scroll = tk.Scrollbar(fr_bot, orient='vertical', command=self.tex.yview)
-        # scroll.pack(side='left', fill='y')
         self.tex.config(yscrollcommand=self.scroll.set, relief='flat')
         self.tex.grid(column=0, row=0, sticky='wens')
         self.scroll.grid(column=1, row=0, sticky='ns')
 
-
         self.bt_rmas = tk.Button(fra, text='+', width=2, **_cf_bts)
         self.bt_rmas.pack(side='left')
-
         self.bt_abrir = tk.Button(fra, text='ABRIR', width=5, command=self.abrir_ruta, **_cf_bts)
         self.bt_abrir.pack(side='left')
-
 
         self.rowconfigure(0, weight=1, minsize=32)
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1, minsize=24)
-
 
         # ESTILOS
         s = ttk.Style()
@@ -133,15 +132,14 @@ class FolderFecha(tk.Tk):
             bordercolor=bg
         )
         s.map(
-            'TCombobox', foreground=[('readonly',cf['def'])],
+            'TCombobox', foreground=[('readonly', cf['az2'])],
             selectbackground=[('focus', cf['bg']), ('!focus', bg), ('readonly', bg)],
             fieldbackground=[('focus', bg), ('!focus', bg), ('readonly', bg)],
-            selectforeground=[('focus', cf['az2']), ('!focus', cf['ng1'])]
+            selectforeground=[('focus', cf['mor1']), ('!focus', cf['az2'])]
         )
         self.option_add("*TCombobox*Listbox*Background", bg)
         self.option_add('*TCombobox*Listbox*selectBackground', cf['am1'])
         self.option_add('*TCombobox*Listbox*selectForeground', cf['def'])
-
 
         # INICIA VALORES
         self.rutas_carga()
@@ -171,21 +169,11 @@ class FolderFecha(tk.Tk):
             'TCheckbutton',
             indicatorrefief='flat',
             background='white',
-            # indicatormargin=5
-            # padding=0,
-            # selectbackground=bg
-            # bordercolor='red',
-            # border=0
         )
         s.map(
             'TCheckbutton',
-            # foreground=[('focus', 'green')],
-            # background=[('focus', 'yellow'), ('!focus', 'orange')],
             indicatorbackground=[('focus', '#C1F1FF'), ('!focus', bg)],
             indicatorcolor=[('focus', 'red'), ('!focus', 'white')]
-            # selectbackground=[('focus', 'flat'), ('!focus', 'flat')],
-            # lightcolor=[('focus', 'green')],
-            # darkcolor=[('focus', 'orange')]
         )
 
     def rutas_carga(self):
@@ -266,7 +254,7 @@ class FolderFecha(tk.Tk):
         archivo_formatos = self.cf.get('mis formatos')
         if not Path(archivo_formatos).exists():
             with open(archivo_formatos, 'w') as txt:
-                txt.write('%A %w - %H.%M\n')
+                txt.write('%a %d - %H.%M\n')
             self.escribe(f'"{archivo_formatos}" fue creado.\n', self.cf['ver2'])
         lineas = self.lee_archivo(archivo_formatos)
         self.cmb_formato.config(values=lineas)
@@ -301,16 +289,11 @@ class FolderFecha(tk.Tk):
             self.escribe(f'{new_ruta}\n', 'ver2')
 
     def abrir_ruta(self):
-        # app.attributes('-topmost', True)
-        # app.update()
-        # app.attributes('-topmost', False)
         try:
-            rt = self.cmb_rutas.get()
-            os.system(f"start {rt}")
-            self.attributes('-topmost', True)
+            rt = os.path.realpath(self.cmb_rutas.get().strip())
+            webbrowser.open(rt)
         except Exception as e:
             self.escribe(f"{e} ->{rt}", self.cf['err'])
-        # self.attributes('-topmost', False)
 
     def _sobre(self):
         self.attributes('-topmost', self.ONTOP.get())
